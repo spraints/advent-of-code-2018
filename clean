@@ -1,0 +1,9 @@
+#!/bin/bash
+
+set -e
+set -o nounset
+
+root="$(cd $(dirname "$0"); pwd -P)"
+. "${root}/.vars"
+
+docker rm -f $container
