@@ -1,0 +1,26 @@
+#!/bin/bash
+
+set -e
+set -o nounset
+set -x
+
+root="$(cd $(dirname "$0"); pwd -P)"
+container="$(basename "$root")"-dev
+image="$(basename "$root")"
+
+if ! docker inspect $container >&/dev/null; then
+  echo Building $image
+  tar cf - Dockerfile | docker build -t $image .
+
+  echo Creating $container
+  docker create \
+    --name $container \
+    --user $(id -u):$(id -g) \
+    --volume "$root:/workspace" \
+    --workdir /workspace \
+    $image
+fi
+
+docker start $container 1>&2 || true
+
+exec docker exec -it $container $(basename $0) "$@"
